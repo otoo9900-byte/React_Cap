@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  --color-dark-bg: #0A0A0A;
+  --color-dark-card: #141414;
+  --color-dark-border: #2A2A2A;
+  --color-brand-primary: #3B82F6;
+  --color-brand-secondary: #8B5CF6;
+  --color-text-primary: #F3F4F6;
+  --color-text-secondary: #9CA3AF;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-dark-bg);
+    color: var(--color-text-primary);
+  }
+}
