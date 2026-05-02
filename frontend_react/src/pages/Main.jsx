@@ -25,18 +25,16 @@ export default function Main() {
             </h1>
             <p className="text-sm text-text-secondary mt-1">PromptGate 최적화 세션</p>
           </div>
-          <button 
-             onClick={resetSession}
-             className="flex items-center gap-2 px-3 py-2 text-sm text-text-secondary hover:text-text-primary border border-dark-border hover:bg-dark-card rounded-lg transition-colors"
-          >
-             <RefreshCcw size={16} />
-             New Session
-          </button>
-        </div>
-
-        {/* Dashboard Top */}
-        <div className="w-full xl:w-2/3">
-           <CostSimulator />
+          <div className="flex items-center gap-3">
+            <CostSimulator />
+            <button 
+               onClick={resetSession}
+               className="flex items-center gap-2 px-3 py-2 text-sm text-text-secondary hover:text-text-primary border border-dark-border hover:bg-dark-card rounded-lg transition-colors shadow-sm"
+            >
+               <RefreshCcw size={16} />
+               New Session
+            </button>
+          </div>
         </div>
 
         {/* Result Area */}
