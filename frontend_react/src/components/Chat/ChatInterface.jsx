@@ -3,7 +3,7 @@ import usePromptGateStore from '../../store/usePromptGateStore';
 import { Send, Bot, User, Loader2 } from 'lucide-react';
 
 export default function ChatInterface() {
-  const { messages, isTyping, sendMessageMock } = usePromptGateStore();
+  const { messages, isTyping, sendMessage } = usePromptGateStore();
   const [input, setInput] = useState('');
   const messagesEndRef = useRef(null);
 
@@ -18,7 +18,7 @@ export default function ChatInterface() {
   const handleSend = (e) => {
     e.preventDefault();
     if (!input.trim()) return;
-    sendMessageMock(input.trim());
+    sendMessage(input.trim());
     setInput('');
   };
 
