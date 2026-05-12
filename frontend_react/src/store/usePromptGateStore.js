@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-const usePromptGateStore = create((set) => ({
+const usePromptGateStore = create((set, get) => ({
   // Chat State
   messages: [
     {
@@ -10,6 +10,7 @@ const usePromptGateStore = create((set) => ({
     },
   ],
   isTyping: false,
+  conversationId: null,
 
   // Assembler State
   assembledPrompt: null,
@@ -47,6 +48,7 @@ const usePromptGateStore = create((set) => ({
       assembledPrompt: null,
       intents: null,
       tokenMetrics: { directCostUsd: 0, optimizedCostUsd: 0, savedTokens: 0 },
+      conversationId: null,
     }),
 
   // Real API Call
@@ -58,7 +60,8 @@ const usePromptGateStore = create((set) => ({
 
     try {
       const { sendChatMessage } = await import('../api/chatClient.js');
-      const result = await sendChatMessage(userText);
+      const currentConversationId = get().conversationId || "";
+      const result = await sendChatMessage(userText, currentConversationId);
       
       set((state) => ({
         messages: [
@@ -70,6 +73,7 @@ const usePromptGateStore = create((set) => ({
           },
         ],
         isTyping: false,
+        conversationId: result.conversation_id || state.conversationId,
       }));
 
       // Update token metrics if provided
