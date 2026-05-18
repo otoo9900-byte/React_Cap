@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from services.dify_client import send_message_to_dify
+import re
 
 chat_bp = Blueprint('chat_bp', __name__)
 
@@ -26,6 +27,16 @@ def handle_chat():
     ai_answer = dify_result.get("answer", "No answer received from AI.")
     new_conversation_id = dify_result.get("conversation_id", "")
     
+    # Parse for <prompt>...</prompt> tags
+    assembled_prompt = None
+    prompt_match = re.search(r'<prompt>([\s\S]*?)</prompt>', ai_answer, re.IGNORECASE)
+    if prompt_match:
+        assembled_prompt = prompt_match.group(1).strip()
+        # Remove the prompt block from the chat answer
+        ai_answer = re.sub(r'<prompt>[\s\S]*?</prompt>', '', ai_answer, flags=re.IGNORECASE).strip()
+        if not ai_answer:
+            ai_answer = "프롬프트 생성이 완료되었습니다. 우측 작업 공간을 확인해 주세요."
+    
     # Extract token usage if available (from metadata.usage)
     usage = dify_result.get("metadata", {}).get("usage", {})
     total_tokens = usage.get("total_tokens", 0)
@@ -34,6 +45,7 @@ def handle_chat():
     return jsonify({
         "status": "success",
         "response": ai_answer,
+        "assembledPrompt": assembled_prompt,
         "conversation_id": new_conversation_id,
         "token_metrics": {
             "savedTokens": total_tokens // 2 if total_tokens > 0 else 125,

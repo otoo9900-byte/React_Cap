@@ -76,6 +76,11 @@ const usePromptGateStore = create((set, get) => ({
         conversationId: result.conversation_id || state.conversationId,
       }));
 
+      // Update assembled prompt if provided
+      if (result.assembledPrompt) {
+        set({ assembledPrompt: result.assembledPrompt });
+      }
+
       // Update token metrics if provided
       if (result.token_metrics) {
         set({ tokenMetrics: result.token_metrics });
