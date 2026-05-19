@@ -27,6 +27,9 @@ def handle_chat():
     ai_answer = dify_result.get("answer", "No answer received from AI.")
     new_conversation_id = dify_result.get("conversation_id", "")
     
+    # Remove <think>...</think> blocks from AI reasoning models
+    ai_answer = re.sub(r'<think>[\s\S]*?</think>', '', ai_answer, flags=re.IGNORECASE).strip()
+    
     # Parse for <prompt>...</prompt> tags
     assembled_prompt = None
     prompt_match = re.search(r'<prompt>([\s\S]*?)</prompt>', ai_answer, re.IGNORECASE)

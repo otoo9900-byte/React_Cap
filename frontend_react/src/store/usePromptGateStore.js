@@ -62,7 +62,7 @@ const usePromptGateStore = create((set, get) => ({
       const { sendChatMessage } = await import('../api/chatClient.js');
       const currentConversationId = get().conversationId || "";
       const result = await sendChatMessage(userText, currentConversationId);
-      
+
       set((state) => ({
         messages: [
           ...state.messages,
