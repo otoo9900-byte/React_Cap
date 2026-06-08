@@ -6,7 +6,7 @@ const usePromptGateStore = create((set, get) => ({
     {
       id: 'system-start',
       role: 'assistant',
-      content: '안녕하세요! 저는 PromptGate 에이전트입니다. 어떤 종류의 프롬프트를 만들고 싶으신가요? (예: "로고 만들어줘", "블로그 글 써줘")',
+      content: '안녕하세요! ✈️ **PromptGate AI 여행 플래너**입니다. 사용자님의 선호도와 맛집 취향에 맞는 완벽한 일정을 디자인해 드릴게요. 먼저, **이번 여행은 어디로 떠나고 싶으신가요? 📍**',
     },
   ],
   isTyping: false,
@@ -14,6 +14,7 @@ const usePromptGateStore = create((set, get) => ({
 
   // Assembler State
   assembledPrompt: null,
+  travelPlan: null,
   intents: null,
   finalResult: null,
   isExecuting: false,
@@ -44,10 +45,11 @@ const usePromptGateStore = create((set, get) => ({
         {
           id: 'system-start',
           role: 'assistant',
-          content: '안녕하세요! 저는 PromptGate 에이전트입니다. 어떤 종류의 프롬프트를 만들고 싶으신가요?',
+          content: '안녕하세요! ✈️ **PromptGate AI 여행 플래너**입니다. 사용자님의 선호도와 맛집 취향에 맞는 완벽한 일정을 디자인해 드릴게요. 먼저, **이번 여행은 어디로 떠나고 싶으신가요? 📍**',
         },
       ],
       assembledPrompt: null,
+      travelPlan: null,
       intents: null,
       finalResult: null,
       isExecuting: false,
@@ -65,7 +67,10 @@ const usePromptGateStore = create((set, get) => ({
     try {
       const { sendChatMessage } = await import('../api/chatClient.js');
       const currentConversationId = get().conversationId || "";
-      const result = await sendChatMessage(userText, currentConversationId);
+      const allMessages = get().messages;
+      const currentPlan = get().travelPlan || null;
+      const currentAssembledPrompt = get().assembledPrompt || null;
+      const result = await sendChatMessage(userText, allMessages, currentConversationId, currentPlan, currentAssembledPrompt);
 
       set((state) => ({
         messages: [
@@ -80,9 +85,13 @@ const usePromptGateStore = create((set, get) => ({
         conversationId: result.conversation_id || state.conversationId,
       }));
 
-      // Update assembled prompt if provided
-      if (result.assembledPrompt) {
-        set({ assembledPrompt: result.assembledPrompt });
+      // Update assembled prompt, travel plan & intents if provided
+      if (result.assembledPrompt || result.travel_plan) {
+        set({
+          assembledPrompt: result.assembledPrompt || get().assembledPrompt,
+          travelPlan: result.travel_plan || get().travelPlan,
+          intents: result.extractedIntents || get().intents,
+        });
       }
 
       // Update token metrics if provided

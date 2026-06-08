@@ -1,13 +1,13 @@
 const API_BASE_URL = 'http://localhost:5000/api';
 
-export const sendChatMessage = async (message, conversationId = "") => {
+export const sendChatMessage = async (message, messages = [], conversationId = "", currentPlan = null, currentAssembledPrompt = null) => {
   try {
     const response = await fetch(`${API_BASE_URL}/chat/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ message, conversationId }),
+      body: JSON.stringify({ message, messages, conversationId, currentPlan, currentAssembledPrompt }),
     });
 
     if (!response.ok) {
