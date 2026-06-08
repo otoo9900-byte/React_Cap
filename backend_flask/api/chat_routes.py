@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from services.dify_client import send_message_to_dify
+from services.llm_client import generate_final_result
 import re
 
 chat_bp = Blueprint('chat_bp', __name__)
@@ -27,8 +28,8 @@ def handle_chat():
     ai_answer = dify_result.get("answer", "No answer received from AI.")
     new_conversation_id = dify_result.get("conversation_id", "")
     
-    # Remove <think>...</think> blocks from AI reasoning models
-    ai_answer = re.sub(r'<think>[\s\S]*?</think>', '', ai_answer, flags=re.IGNORECASE).strip()
+    # Remove <think>...</think> blocks from AI reasoning models (handles unclosed tags if cut off)
+    ai_answer = re.sub(r'<think>[\s\S]*?(?:</think>|$)', '', ai_answer, flags=re.IGNORECASE).strip()
     
     # Parse for <prompt>...</prompt> tags
     assembled_prompt = None
@@ -55,4 +56,24 @@ def handle_chat():
             "optimizedCostUsd": 0.0015,
             "directCostUsd": 0.0025
         }
+    })
+
+@chat_bp.route('/execute', methods=['POST'])
+def execute_prompt():
+    """
+    Executes the generated prompt using Gemini API and returns the result.
+    """
+    data = request.json
+    if not data or 'prompt' not in data:
+        return jsonify({"error": "No prompt provided"}), 400
+
+    prompt = data.get('prompt')
+    result = generate_final_result(prompt)
+
+    if "error" in result:
+        return jsonify({"status": "error", "error": result["error"]}), 500
+
+    return jsonify({
+        "status": "success",
+        "result": result["result"]
     })

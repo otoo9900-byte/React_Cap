@@ -15,6 +15,8 @@ const usePromptGateStore = create((set, get) => ({
   // Assembler State
   assembledPrompt: null,
   intents: null,
+  finalResult: null,
+  isExecuting: false,
 
   // Token Metrics State
   tokenMetrics: {
@@ -47,6 +49,8 @@ const usePromptGateStore = create((set, get) => ({
       ],
       assembledPrompt: null,
       intents: null,
+      finalResult: null,
+      isExecuting: false,
       tokenMetrics: { directCostUsd: 0, optimizedCostUsd: 0, savedTokens: 0 },
       conversationId: null,
     }),
@@ -99,6 +103,31 @@ const usePromptGateStore = create((set, get) => ({
         ],
         isTyping: false,
       }));
+    }
+  },
+
+  // Execute Prompt Action
+  runAssembledPrompt: async () => {
+    const { assembledPrompt } = get();
+    if (!assembledPrompt) return;
+
+    set({ isExecuting: true, finalResult: null });
+
+    try {
+      const { executeAssembledPrompt } = await import('../api/chatClient.js');
+      const result = await executeAssembledPrompt(assembledPrompt);
+
+      if (result.status === 'success') {
+        set({ finalResult: result.result, isExecuting: false });
+      } else {
+        set({ finalResult: "오류가 발생했습니다: " + result.error, isExecuting: false });
+      }
+    } catch (error) {
+      console.error(error);
+      set({ 
+        finalResult: "결과를 생성하는 중 오류가 발생했습니다. 백엔드 연결 또는 API 키를 확인해주세요.", 
+        isExecuting: false 
+      });
     }
   },
 }));
