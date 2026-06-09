@@ -115,19 +115,22 @@ def handle_chat():
         dest_m = re.search(r'목적지:\s*(.*)', assembled_prompt)
         if dest_m: intents["destination"] = dest_m.group(1).strip()
 
-        budget_m = re.search(r'예산:\s*(.*)', assembled_prompt)
-        if budget_m: intents["budget"] = budget_m.group(1).strip()
+        budget_m = re.search(r'(총 예산|예산):\s*(.*)', assembled_prompt)
+        if budget_m: intents["budget"] = budget_m.group(2).strip()
 
-        dur_m = re.search(r'기간:\s*(.*)', assembled_prompt)
-        if dur_m: intents["duration"] = dur_m.group(1).strip()
+        dur_m = re.search(r'(여행 기간|기간):\s*(.*)', assembled_prompt)
+        if dur_m: intents["duration"] = dur_m.group(2).strip()
 
         comp_m = re.search(r'동반자:\s*(.*)', assembled_prompt)
         if comp_m: intents["companion"] = comp_m.group(1).strip()
 
-        style_m = re.search(r'스타일:\s*(.*)', assembled_prompt)
-        if style_m: intents["style"] = style_m.group(1).strip()
+        style_m = re.search(r'(여행 스타일|스타일):\s*(.*)', assembled_prompt)
+        if style_m: intents["style"] = style_m.group(2).strip()
 
-        food_m = re.search(r'(음식 취향|음식):\s*(.*)', assembled_prompt)
+        det_m = re.search(r'상세 취향:\s*(.*)', assembled_prompt)
+        if det_m: intents["detailed_preference"] = det_m.group(1).strip()
+
+        food_m = re.search(r'(음식 취향 및 피해야 할 음식|음식 취향|음식):\s*(.*)', assembled_prompt)
         if food_m: intents["food_preference"] = food_m.group(2).strip()
     
     # Extract token usage if available (from metadata.usage)

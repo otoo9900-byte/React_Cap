@@ -10,6 +10,7 @@ const INTENT_LABELS = {
   duration: '기간 📅',
   companion: '동반자 👥',
   style: '여행 스타일 ✨',
+  detailed_preference: '상세 취향 🔍',
   food_preference: '음식 취향 🍕'
 };
 
