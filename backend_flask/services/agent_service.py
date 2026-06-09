@@ -8,7 +8,7 @@ load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GEMINI_API_KEY = GROQ_API_KEY  # chat_routes.py 호환용 별칭
 
-MODEL = "qwen/qwen3-32b"
+MODEL = "llama-3.3-70b-versatile"
 
 # ─────────────────────────────────────────────
 # Python이 직접 관리하는 다음 질문 (LLM에 의존 안 함)
