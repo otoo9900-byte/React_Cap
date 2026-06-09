@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import usePromptGateStore from '../../store/usePromptGateStore';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Copy, CheckCircle2, Sparkles, AlertCircle, Calendar, Terminal, Loader2, ArrowRight } from 'lucide-react';
+import { Copy, CheckCircle2, Sparkles, AlertCircle, Calendar, Terminal, Loader2, ArrowRight, Play } from 'lucide-react';
 
 const INTENT_LABELS = {
   destination: '목적지 📍',
@@ -46,7 +46,7 @@ const markdownComponents = {
 };
 
 export default function PromptAssembler() {
-  const { assembledPrompt, travelPlan, intents } = usePromptGateStore();
+  const { assembledPrompt, travelPlan, intents, finalResult, isExecuting, runAssembledPrompt } = usePromptGateStore();
   const [activeTab, setActiveTab] = useState('prompt');
   const [copied, setCopied] = useState(false);
   const [loadingItinerary, setLoadingItinerary] = useState(false);
@@ -59,7 +59,7 @@ export default function PromptAssembler() {
   }, [assembledPrompt]);
 
   const handleCopy = () => {
-    const textToCopy = activeTab === 'prompt' ? assembledPrompt : travelPlan;
+    const textToCopy = activeTab === 'prompt' ? assembledPrompt : (travelPlan || finalResult);
     if (textToCopy) {
       navigator.clipboard.writeText(textToCopy);
       setCopied(true);
@@ -75,6 +75,11 @@ export default function PromptAssembler() {
       setLoadingItinerary(false);
       setActiveTab('itinerary');
     }, 1200);
+  };
+
+  const handleExecute = async () => {
+    setActiveTab('itinerary');
+    await runAssembledPrompt();
   };
 
   if (!assembledPrompt) {
@@ -104,7 +109,7 @@ export default function PromptAssembler() {
             Optimized Prompt
           </button>
           
-          {travelPlan && (
+          {(travelPlan || finalResult) && (
             <button
               onClick={() => setActiveTab('itinerary')}
               className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
@@ -119,13 +124,26 @@ export default function PromptAssembler() {
           )}
         </div>
 
-        <button 
-          onClick={handleCopy}
-          className="flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-semibold bg-brand-primary hover:bg-blue-600 text-white rounded-lg transition-colors shrink-0"
-        >
-          {copied ? <CheckCircle2 size={14} /> : <Copy size={14} />}
-          {copied ? 'Copied' : 'Copy Content'}
-        </button>
+        <div className="flex items-center gap-2">
+          {activeTab === 'prompt' && (
+            <button 
+              onClick={handleExecute}
+              disabled={isExecuting}
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold bg-brand-secondary hover:bg-purple-600 disabled:bg-gray-600 text-white rounded-lg transition-colors shrink-0"
+            >
+              {isExecuting ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
+              {isExecuting ? 'Executing...' : 'Execute AI (일정표 불러오기)'}
+            </button>
+          )}
+
+          <button 
+            onClick={handleCopy}
+            className="flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-semibold bg-brand-primary hover:bg-blue-600 text-white rounded-lg transition-colors shrink-0"
+          >
+            {copied ? <CheckCircle2 size={14} /> : <Copy size={14} />}
+            {copied ? 'Copied' : 'Copy Content'}
+          </button>
+        </div>
       </div>
 
       {/* Intents Meta */}
@@ -177,9 +195,17 @@ export default function PromptAssembler() {
           </div>
         ) : (
           <div className="prose prose-invert max-w-none text-sm">
-            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-              {travelPlan}
-            </ReactMarkdown>
+            {isExecuting ? (
+              <div className="h-full flex flex-col items-center justify-center text-center py-12">
+                <Loader2 size={40} className="animate-spin text-brand-primary mb-4" />
+                <h3 className="text-lg font-medium text-text-primary mb-2">AI가 결과물을 생성 중입니다...</h3>
+                <p className="text-sm text-text-secondary">이 작업은 약 5~15초 정도 소요될 수 있습니다.</p>
+              </div>
+            ) : (
+              <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                {travelPlan || finalResult}
+              </ReactMarkdown>
+            )}
           </div>
         )}
       </div>
